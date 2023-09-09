@@ -15,21 +15,23 @@ struct VideoListView: View {
     var body: some View {
         NavigationView {
             List(videos) { video in
-                HStack {
-                    // Video thumbnail
-                    AsyncImage(url: video.thumbnail) { image in
-                        image
-                            .resizable()
-                            // Square
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 50, height: 50)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                    } placeholder: {
-                        ProgressView()
+                NavigationLink(destination: VideoDetailsView(video: video)) {
+                    HStack {
+                        // Video thumbnail
+                        AsyncImage(url: video.thumbnail) { image in
+                            image
+                                .resizable()
+                                // Square
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 50, height: 50)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        // Video title
+                        Text(video.name)
+                            .font(.body)
                     }
-                    // Video title
-                    Text(video.name)
-                        .font(.body)
                 }
             }
             .navigationTitle("Videos")
@@ -54,6 +56,7 @@ struct Video: Identifiable, Decodable {
     let thumbnail: URL
     let description: String
 }
+
 
 
 // Showing preview
