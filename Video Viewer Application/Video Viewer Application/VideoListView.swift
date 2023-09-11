@@ -10,6 +10,7 @@ import Alamofire
 
 struct VideoListView: View {
     @State private var videos: [Video] = []
+    @State private var showError = false
     let videoURL = "https://iphonephotographyschool.com/test-api/lessons"
     
     var body: some View {
@@ -35,16 +36,35 @@ struct VideoListView: View {
                 }
             }
             .navigationTitle("Videos")
+            // Pull to refresh
             .refreshable {
-                do {
-                    let url = URL(string: videoURL)!
-                    let (data, _) = try await URLSession.shared.data(from: url)
-                    let json = try JSONDecoder().decode([String: [Video]].self, from: data)
-                    videos = json["lessons"] ?? []
-                } catch {
-                    print("Error fetching videos:", error)
-                }
+                await loadVideos()
             }
+            // Videos loaded at launch
+            .task {
+                await loadVideos()
+            }
+        }
+        .alert(isPresented: $showError) {
+            Alert(
+                title: Text("Error fetching data!"),
+                message: Text("Please try again!"),
+                dismissButton: .default(Text("Ok"))
+            )
+        }
+    }
+
+    func loadVideos() async {
+        do {
+            let url = URL(string: videoURL)!
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let json = try JSONDecoder().decode([String: [Video]].self, from: data)
+            videos = json["lessons"] ?? []
+        } catch {
+            // Error in console
+            print("Error:", error)
+            // Error in app
+            self.showError = true
         }
     }
 }
@@ -60,8 +80,8 @@ struct Video: Identifiable, Decodable {
 
 
 // Showing preview
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        VideoListView()
-    }
-}
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        VideoListView()
+//    }
+//}
