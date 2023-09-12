@@ -73,8 +73,9 @@ struct VideoListView: View {
 struct Video: Identifiable, Decodable {
     let id: Int
     let name: String
-    let thumbnail: URL
     let description: String
+    let thumbnail: URL
+    let video_url: URL
 }
 
 

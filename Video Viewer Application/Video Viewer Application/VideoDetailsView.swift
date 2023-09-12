@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVKit
 
 struct VideoDetailsView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
@@ -13,6 +14,10 @@ struct VideoDetailsView: View {
 
     var body: some View {
         VStack(alignment: .center) {
+            VideoPlayer(player: AVPlayer(url: video.video_url))
+                .frame(height: 200)
+                .cornerRadius(10)
+                .padding()
             Text(video.name)
                 .font(.title)
                 .multilineTextAlignment(.center)
@@ -33,6 +38,6 @@ struct VideoDetailsView: View {
                 }
             }
         }
+        .edgesIgnoringSafeArea(.top)
     }
 }
-
