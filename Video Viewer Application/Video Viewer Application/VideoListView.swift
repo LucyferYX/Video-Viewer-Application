@@ -9,8 +9,8 @@ import SwiftUI
 import Alamofire
 
 struct VideoListView: View {
-    @State private var videos: [Video] = []
-    @State private var showError = false
+    @State var videos: [Video] = []
+    @State var showError = false
     let videoURL = "https://iphonephotographyschool.com/test-api/lessons"
     
     var body: some View {
