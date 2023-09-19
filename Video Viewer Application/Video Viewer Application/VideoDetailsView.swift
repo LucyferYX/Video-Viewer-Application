@@ -80,18 +80,23 @@ struct VideoDetailsView: View {
     @StateObject var downloadManager = DownloadManager()
     var video: Video
 
+    @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
+
     var body: some View {
-        VStack(alignment: .center) {
-            VideoPlayer(player: AVPlayer(url: video.video_url))
-                .frame(height: 200)
-                .cornerRadius(10)
-                .padding()
-            Text(video.name)
-                .font(.title)
-                .multilineTextAlignment(.center)
-                .padding()
-            Text(video.description)
-                .padding()
+        ScrollView {
+            VStack(alignment: .center) {
+                VideoPlayer(player: AVPlayer(url: video.video_url))
+                    // Adjusts height based on orientation
+                    .frame(height: orientation?.isLandscape == true ? UIScreen.main.bounds.height / 2 : UIScreen.main.bounds.width * 9 / 16)
+                    .cornerRadius(10)
+                    .padding()
+                Text(video.name)
+                    .font(.title)
+                    .multilineTextAlignment(.center)
+                    .padding()
+                Text(video.description)
+                    .padding()
+            }
         }
         // Download button
         .toolbar {
@@ -110,6 +115,8 @@ struct VideoDetailsView: View {
                 }
             }
         }
-        .edgesIgnoringSafeArea(.top)
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+            self.orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
+        }
     }
 }
