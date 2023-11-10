@@ -13,19 +13,37 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
     @Published var isDownloading = false
     var downloadTask: URLSessionDownloadTask?
 
+    
+    let semaphore = DispatchSemaphore(value: 5) // Maximum of 5 concurrent downloads
+
     func startDownload(_ url: URL) {
         DispatchQueue.global(qos: .background).async {
+            self.semaphore.wait() // Decrement semaphore count and wait if count is 0
             let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
             self.downloadTask = session.downloadTask(with: url)
             self.downloadTask?.resume()
             DispatchQueue.main.async {
                 self.isDownloading = true
             }
+            self.semaphore.signal() // Increment semaphore count when download is finished
         }
     }
 
+    
+//    func startDownload(_ url: URL) {
+//        DispatchQueue.global(qos: .background).async {
+//            let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
+//            self.downloadTask = session.downloadTask(with: url)
+//            self.downloadTask?.resume()
+//            DispatchQueue.main.async {
+//                self.isDownloading = true
+//            }
+//        }
+//    }
+
     func cancelDownload() {
         downloadTask?.cancel()
+        downloadTask = nil
         isDownloading = false
     }
 
@@ -36,19 +54,22 @@ class DownloadManager: NSObject, ObservableObject, URLSessionDownloadDelegate {
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        let documentsPath = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
-        let destinationURL = documentsPath.appendingPathComponent(location.lastPathComponent)
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let destinationURL = documentsPath.appendingPathComponent("video.mp4")
         
         do {
             try FileManager.default.moveItem(at: location, to: destinationURL)
+            print("File downloaded to: \(destinationURL)") // Print the destination URL
         } catch let error as NSError {
-            print("Couldn't move video to Downloads folder. Error: \(error)")
+            print("Couldn't move video to Documents folder. Error: \(error)")
         }
         
         DispatchQueue.main.async {
             self.isDownloading = false
         }
     }
+
+
 
     // Findings errors
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {

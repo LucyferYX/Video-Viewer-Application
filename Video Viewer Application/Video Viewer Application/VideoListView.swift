@@ -60,6 +60,16 @@ struct VideoListView: View {
             let (data, _) = try await URLSession.shared.data(from: url)
             let json = try JSONDecoder().decode([String: [Video]].self, from: data)
             videos = json["lessons"] ?? []
+            
+            // Added a small test video to see whether downloading can be finished
+            if let testVideoURL = URL(string: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4") {
+                let testVideo = Video(id: videos.count + 1,
+                                      name: "Test Video",
+                                      description: "Video to test downloading.",
+                                      thumbnail: testVideoURL,
+                                      video_url: testVideoURL)
+                videos.append(testVideo)
+            }
         } catch {
             // Error in console
             print("Error:", error)
@@ -67,6 +77,7 @@ struct VideoListView: View {
             self.showError = true
         }
     }
+
 }
 
 
